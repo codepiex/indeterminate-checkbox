@@ -26,6 +26,8 @@ public class IndeterminateCheckBox extends AppCompatCheckBox
     };
 
     private boolean mIndeterminate;
+    private boolean mIndeterminateCache;
+    private boolean mToggling;
     private transient boolean mBroadcasting;
     private transient OnStateChangedListener mOnStateChangedListener;
 
@@ -77,13 +79,25 @@ public class IndeterminateCheckBox extends AppCompatCheckBox
 
     @Override
     public void toggle() {
+        mToggling = true;
         if (mIndeterminate) {
             setChecked(true);
-        } else {
+        }
+        else if(isChecked()){
             super.toggle();
         }
+        else {
+            if (mIndeterminateCache){
+                setIndeterminateImpl(true, true);
+            }
+            else {
+                super.toggle();
+            }
+        }
+        mToggling = false;
     }
 
+    @Override
     public void setChecked(boolean checked) {
         final boolean checkedChanged = isChecked() != checked;
         super.setChecked(checked);
@@ -91,6 +105,9 @@ public class IndeterminateCheckBox extends AppCompatCheckBox
         setIndeterminateImpl(false, false);
         if (wasIndeterminate || checkedChanged) {
             notifyStateListener();
+        }
+        if (!mToggling){
+            mIndeterminateCache = false;
         }
     }
 
@@ -100,6 +117,7 @@ public class IndeterminateCheckBox extends AppCompatCheckBox
     }
 
     public void setIndeterminate(boolean indeterminate) {
+        mIndeterminateCache = indeterminate;
         setIndeterminateImpl(indeterminate, true);
     }
 
@@ -171,8 +189,8 @@ public class IndeterminateCheckBox extends AppCompatCheckBox
     public Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
         IndeterminateSavedState ss = new IndeterminateSavedState(superState);
-        ss.indeterminate = mIndeterminate;
-
+        ss.indeterminate           = mIndeterminate;
+        ss.indeterminateCache      = mIndeterminateCache;
         return ss;
     }
 
@@ -185,7 +203,8 @@ public class IndeterminateCheckBox extends AppCompatCheckBox
         super.onRestoreInstanceState(ss.getSuperState());
         mBroadcasting = false;
 
-        mIndeterminate = ss.indeterminate;
+        mIndeterminate      = ss.indeterminate;
+        mIndeterminateCache = ss.indeterminateCache;
         // Both "indeterminate" and "checked" state are considered "excited" states. "Excited" state
         // is state that is different from the default "unchecked". On view restoration CompoundButton
         // notifies for change if the restored state is non-default. So, we will do the same for our merged state.
@@ -193,4 +212,5 @@ public class IndeterminateCheckBox extends AppCompatCheckBox
             notifyStateListener();
         }
     }
+
 }

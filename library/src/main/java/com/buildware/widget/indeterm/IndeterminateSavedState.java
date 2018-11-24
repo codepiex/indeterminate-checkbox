@@ -9,6 +9,7 @@ import android.view.View;
  */
 class IndeterminateSavedState extends View.BaseSavedState {
     boolean indeterminate;
+    boolean indeterminateCache;
 
     /**
      * Constructor called from {@link IndeterminateRadioButton#onSaveInstanceState()}
@@ -22,20 +23,23 @@ class IndeterminateSavedState extends View.BaseSavedState {
      */
     private IndeterminateSavedState(Parcel in) {
         super(in);
-        indeterminate = in.readInt() != 0;
+        indeterminate       = in.readInt() != 0;
+        indeterminateCache  = in.readInt() != 0;
     }
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
         super.writeToParcel(out, flags);
         out.writeInt(indeterminate ? 1 : 0);
+        out.writeInt(indeterminateCache ? 1 : 0);
     }
 
     @Override
     public String toString() {
         return "IndetermSavedState.SavedState{"
                 + Integer.toHexString(System.identityHashCode(this))
-                + " indeterminate=" + indeterminate + "}";
+                + " indeterminate=" + indeterminate
+                + " indeterminateCache=" + indeterminateCache + "}";
     }
 
     public static final Creator<IndeterminateSavedState> CREATOR
