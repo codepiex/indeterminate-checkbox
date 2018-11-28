@@ -205,6 +205,13 @@ public class IndeterminateCheckBox extends AppCompatCheckBox
 
         mIndeterminate      = ss.indeterminate;
         mIndeterminateCache = ss.indeterminateCache;
+
+        //Refresh drawable state in-case state is indeterminate because when restoring the view
+        //in view pager fragment/view state gets restored but drawable doesn't update.
+        if (mIndeterminate){
+            refreshDrawableState();
+        }
+
         // Both "indeterminate" and "checked" state are considered "excited" states. "Excited" state
         // is state that is different from the default "unchecked". On view restoration CompoundButton
         // notifies for change if the restored state is non-default. So, we will do the same for our merged state.
